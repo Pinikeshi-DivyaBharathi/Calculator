@@ -1,0 +1,86 @@
+function handleButtonClick(value) {
+    // Get the Display element
+    const displayElement = document.getElementById('display');
+
+    // Check for specific button values
+    if (value == 'AC') {
+        displayElement.value = '';
+    } else if (value == 'DEL') {
+        displayElement.value = displayElement.value.slice(0, -1);
+    } else if (value == '=') {
+        try {
+            const result = evaluateExpression(displayElement.value);
+            displayElement.value = result.toFixed(6); // Display with limited decimal places
+        } catch (error) {
+            displayElement.value = "error";
+        }
+    } else {
+        // For trigonometric functions and power, append to the display
+        if (value == 'sin' || value == 'cos' || value == 'log' || value == '^') {
+            displayElement.value += value;
+        } else {
+            // For all other input values, append to the display
+            displayElement.value += value;
+        }
+    }
+
+    // Helper function to evaluate expressions
+    function evaluateExpression(expression) {
+        try {
+            let result;
+            if (expression.includes('sin')) {
+                result = evaluateTrigFunction(expression, Math.sin);
+            } else if (expression.includes('cos')) {
+                result = evaluateTrigFunction(expression, Math.cos);
+            } else if (expression.includes('log')) {
+                result = evaluateLog(expression);
+            } else if (expression.includes('^')) {
+                result = evaluatePower(expression);
+            } else {
+                result = eval(expression);
+            }
+
+            return result;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    // Helper function to evaluate trigonometric functions
+    function evaluateTrigFunction(expression, func) {
+        const input = expression.replace('sin', '').replace('cos', '');
+        const inputValue = parseFloat(input);
+
+        if (!isNaN(inputValue)) {
+            // Convert degrees to radians before applying trigonometric functions
+            const inputInRadians = (Math.PI / 180) * inputValue;
+            return func(inputInRadians);
+        } else {
+            throw new Error("Invalid input for trigonometric function");
+        }
+    }
+
+    // Helper function to evaluate logarithms
+    function evaluateLog(expression) {
+        const input = expression.replace('log', '');
+        const inputValue = parseFloat(input);
+
+        if (!isNaN(inputValue) && inputValue > 0) {
+            return Math.log10(inputValue);
+        } else {
+            throw new Error("Invalid input for logarithm");
+        }
+    }
+
+    // Helper function to evaluate powers
+    function evaluatePower(expression) {
+        const input = expression.split("^");
+        if (input.length === 2) {
+            const base = parseFloat(input[0]);
+            const exponent = parseFloat(input[1]);
+            return Math.pow(base, exponent);
+        } else {
+            throw new Error("Invalid input for power");
+        }
+    }
+}
